@@ -1,0 +1,137 @@
+** Django를 이용한 REST API 구현
+1. REST API
+  1) API(Application Programming Interface)
+  -  프로그램과 프로그램을 연결 시켜주는 매개체
+프로그램을 만들기 위한 데이터를 제공하는 기능이나 데이터를 사용하기 위한 프로그램이나 라이브러리를 API라고 한다. 
+
+Open API : API를 누구나 사용할 수 있도록 공개한 것
+데이터 대신 프레임워크나 라이브러리 형태로 제공되면 SDK(Software Development kit)라고 한다.
+
+  2) CSR(Clinet Side Rendering)
+  -  서버의 역할은 클라이언트로부터 요청을 받아서 데이터를 제공하는 형식으로 구성
+서버는 클라이언트에게 데이터를 제공하고 클라이언트는 데이터를 받아 출력코드를 직접 만들어 출력하는 방식
+
+  3) REST
+ [1] 개요
+  -  REpresentational State Transfer의 약자로 분산 하이퍼미디어 시스템을 위한 소프트웨어 아키텍처의 한 형식
+별도의 전송계층 없이 간단한 인터페이스로 자원을 정의하는 방식
+ 
+ [2] 6가지 제약 조건
+Client-Server 구조
+  클라이언트-서버라는 것은 리소스를 관리하는 서버가 존재하고 다수의 클라이언트가 리소스를 소비하  려고 네트워크를 통해 서버에 접근하는 구조를 의미
+  가장 친숙한 것이 바로 웹 애플리케이션
+
+Statelss : 무상태, 이전에 했던 작업에 대한 내역을 가지고 있지 않다.
+  클라이언트가 서버에 요청을 보낼 때 이전의 요청의 영향을 받지 않는다는 의미
+  
+Cacheable Data
+
+Layered System
+  클라이언트가 서버에 요청을 할 때 여러개의 레이어로 된 서버를 거칠 수 있다.
+
+A Uniform Interface
+  인터페이스가 일관적이어야 한다는 의미
+  
+  ex)
+    아이템을 가져오는 URL - http://www.jheesoft.co.kr/item/get
+    아이템을 추가하는 URL - http://www.jheesoft.co.kr/item/insert 일관성 O
+    아이템을 수정하는 URL - http://www.jheesoft.co.kr/update      일관성 X
+
+Code-On-Demand
+  선택 사항으로 클라이언트는 서버에 코드를 요청할 수 있고 서버가 리턴한 코드를 클라이언트에서 실행할 수 있다.
+
+ [3] 제약조건을 지켜서 만든 서버를 'RESTful 하다' 라고 한다.
+
+  4) Django에서 REST API Server를 구현하기 위한 방법
+ [1] views에서 JsonResponse 를 리턴하는 방식
+테스트를 하기 위해서는 도구를 사용하거나 클라이언트를 구현 해야한다.
+어제 마지막에 했던 방식이 바로 [1] 방식이다.
+오늘은 [2]를 해볼 예정이고 한 프로젝트에서 [1], [2]를 동시에 사용하면 불편해서 보통 동시에 쓰지 않는다. (유지보수문제)
+
+ [2] djangorestframework 패키지를 이용하는 방식
+자체 테스트가 가능하다.
+오늘은 요것을 할 것이다 하기전에 확인 할 것들이 있으니 먼저 보고 하는걸로 하장
+
+
+2. Django rest framework
+  0) 확인
+항상 가장 중요한것은 내가 사용할 데이터베이스가 잘 작동하고 있는지 확인을 해야한다.
+(도커나 운영체제에 설치된 관계형 데이터베이스를 말한다. 나는 도커에 설치해뒀고 잘 작동하고 연결도 잘 되는것을 확인할 수 있다.)
+
+확인을 했으면 작업을 진행 할 디렉토리를 확인한다!
+나는 어제 views에서 JsonResponse를 리턴하는 방식을 사용했기 때문에 새로운 프로젝트 디렉토리를 만들거당 오늘 디렉토리의 이름은,,, restapi로 결정!
+
+  1)프로젝트와 앱을 생성하고 기본 설정한 후 테스트
+ [1] 가상환경을 생성하고 활성화
+나는 가상환경을 만들어놔서 안해도 된다. 만들려면 아래의 명령어를 입력하시라
+python -m venv 가상환경이름
+
+가상환경이름\Scripts\activate
+ [2] 필요한 패키지 설치
+필요한 패키지는 django, djangorestframework, mysqlclient이다
+아래 명령어를 입력하면 한번에 전부 설치가 가능하다!
+
+pip install django djangorestframework mysqlclient
+
+  
+ [3] 프로젝트 생성
+프로젝트를 생성하는 명령어는 아래와 같다. 오늘 프로젝트의 이름은 restapi로 할거기 때문에 내 명령어는 django-admin startproject restapi . 이다 . 을 꼭 찍어줘야 한다.
+
+django-admin startproject 생성할프로젝트이름 .
+
+
+ [4] 애플리케이션 생성
+애플리케이션을 생성하는 명령어는 아래와 같다. 오늘 프로젝트 이름이 restapi이기 때문에 애플리케이션 이름은 apiapp으로 정했으니 python manage.py startapp apiapp 이다
+
+python manage.py startapp 생성할애플리케이션이름
+
+
+ [5] 기본 설정 변경
+프로젝트 디렉토리 안의 settings.py 에서 내가 생성한 앱 그리고 rest_framework 를 추가 해준다.
+나의 경우에는 restapi/settings.py 파일에서 추가해주는 것이당
+어제까지는 직접 html 파일을 생성하고 JsonResponse으로 리턴하는 방법을 사용했지만 오늘은 따로 html 파일을 생성하지 않고, framework를 사용하기 때문에 rest_framework도 함께 추가해주는 것이다.
+( 어제보다 꿀인가? 라고 생각을 살짝해본다 감당은 오후의 내가 하겠지 )
+rest_framework는 우리가 딕셔너리 리스트를 주면 알아서 JsonResponse으로 해석(?) 번역(?) 같은걸 해주는 역할을 한다
+
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "apiapp",
+    "rest_framework",
+]
+
+이제 데이터베이스의 접속정보도 수정해준다. 이건 이때까지 하면서 많이 했기 때문에 금방 할 수 있다!!
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "mango",  # 데이터베이스 이름
+        "USER": "dxjh",  # 접속할 계정
+        "PASSWORD": "yjkk~1606",  # 비밀번호
+        "HOST": "127.0.0.1",  # 데이터베이스 접속위치
+        "PORT": "3306",  # 접속할 포트번호
+    }
+}
+오늘은 mango 데이터베이스를 쓸거다 망고디비~ 내 바로 뒷줄에 앉은 귀여운 빵빵이( 00년생 )가 몽고디비를 망고디비로 알고 있었다고 해서 망고라고 놀리는 맛이 아주 쏠쏠하다.
+그래서 오늘의 데이터베이스 이름은 M.A.N.G.O.
+
+시간 대역도 수정해준다 안하면 유럽시간으로 적용 되니까
+
+TIME_ZONE = "Asia/Seoul" 로 수정!
+
+이까지 했으면 데이터베이스 적용을 테스트 해본다. 아래 두 명령어를 하나씩 실행시키면 된다.
+
+python manage.py makemigrations
+python manage.py migrate
+
+마지막으로 관계형 데이터베이스를 실행시켜 연동이 잘 되었는지 테스트를 진행한다
+
+
+ [6] 실행 및 테스트
+
+
+  2) Git Hub에 Push

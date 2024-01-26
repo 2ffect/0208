@@ -1,0 +1,472 @@
+항상 데이터베이스 접속 체크를 한다
+도커에 MySQL 컨테이너가 작동하고 있는지 확인 후 DBeaver를 이용해 접속을 확인한다.
+docker 컨테이너에  mysql Port 3306:3306 중 앞에오는 3306은 외부에서 접속할 때 포트이고, 뒤에 있는 3306은 내부에서 설정한 포트이다
+
+  >  데이터베이스 접속 정보
+ [1] 사용할 데이터베이스의 종류 : MySQL
+ [2] 데이터베이스 서버의 URL : localhost(127.0.0.1)
+ [3] 데이터베이스 서버의 포트 : 3306(MySQL 기본 포트)
+ [4] 데이터베이스 내에서 영역을 구분하기 위한 코드 : (MySQL의 경우 데이터베이스) : mysql
+  ** [4]의 MySQL의 데이터베이스는 실제 데이터베이스가 아닌 영역을 의미.. Oracle 에서는 시드라고 한다. 클라이언트 영역을 구분할 수 있도록 나눠두는것이다. 
+ [5] 계정 : 관리자의 경우 root
+ [6] 비밀번호 : 안알랴줌 (그치만 꼭 설정 해야한다)
+  ** MySQL 8.0의 경우 설정을 변경하지 않으면 비밀번호가 암호화되어 접속된다. 때에 따라 암호화를 해제해야 할 수도 있다.
+
+  >  Django프로젝트 생성 및 기본설정 수정
+  어제 했던 거지만 다시 복습하며 해본다 
+ [1] 프로젝트를 저장할 디렉토리를 생성하고 프롬프트 이동
+
+ [2] 가상 환경 생성 및 활성화 : 애플리케이션 만들 때는 필수 그 이외의 경우는 생략가능
+가상환경 생성 : python -m venv myvenv
+가상환경 활성화 : myvenv\Scripts\activate 
+
+
+ [3] 필요한 패키지 설치
+pip install django mysqlclient
+
+ [4] django 프로젝트 생성
+django-admin startproject myproject .
+  - . 을 꼭 찍어줘야 한다! manage.py 파일과 myproject라는 디렉토리가 생성된다.
+
+ [5] django 애플리케이션 생성 - 반복수행 가능
+python manage.py startapp myapp
+
+ [6] settings.py 파일을 수정 - 기본 설정
+  -  앱을 등록
+
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "myapp",
+]
+
+  -  데이터베이스 접속 정보 설정
+
+DATABASES = {
+    "default": {
+        "ENGINE" : "django.db.backends.mysql",
+        "NAME" : "dxjh",                  #데이터베이스 이름
+        "USER" : "dxjh",                   #접속할 계정
+        "PASSWORD" : "yjkk~1606",   #비밀번호
+        "HOST" : "127.0.0.1",            #데이터베이스 접속위치
+        "PORT" : "3306",                  #접속할 포트번호
+    }
+}
+
+  -  시간 대역 수정
+TIME_ZONE = "Asia/Seoul"
+
+ [7] 데이터베이스 초기화
+프로젝트를 처음 실행하기 전과 manage.py 파일을 수정한 경우 수행
+
+python manage.py makemigration
+python manage.py migrate
+
+ [8] 관리자 계정 생성 
+관리자가 필요한 경우 수행 (이미 관리자를 생성 했으면 안해도 된다. 난 어제 해서 안해도 된당)
+
+python manage.py createsuperuser
+
+명령을 실행 시키면 ID, Email, Password 를 차례로 물어봐준다 하고싶은거 하면 된다. 친절도 하셔라
+
+ [9] Django 프로젝트를 실행해서 웹 애플리케이션 구동
+python manage.py runserver
+  -  이 경우는 127.0.0.1:8000 으로 접속
+
+python manage.py runserver 127.0.0.1:80
+  -  이 경우는 127.0.0.1:80 으로 접속
+
+python manage.py runserver 0.0.0.0:80
+  -  이 경우는 외부에서 이 컴퓨터의 IP로 접속이 되는데 배포할 때 사용
+내 컴퓨터 IP 확인하는법 : cmd 에서 ipconfig 치고 엔터
+
+ [10] 웹에서 작동하는지 확인해본다~
+
+Model
+ 1) django에서의Model
+  -  데이터베이스를 위한 Layer
+애플리케이션 내의 models.py 파일에 작성한다.
+moddels.py 파일에 모델 클래스를 만들 수 있는데 모델클래스 1개는 데이터베이스 테이블 1개와 매칭 된다. 모델 클래스를 만들 때는 django.db.models.Model 클래스를 상속 받아야 한다.
+모델 클래스의 속성은 테이블 컬럼(필드, 속성 등)이 된다.
+PK(Primary Key)를 설정하지 않으면 자동으로 id가 생성된다.
+
+ 2) 속성의 타입
+  >  CharField
+일반 문자열로 max_langth 속성을 이용해 최대 길이를 설정해줘야 한다.
+  ** EmailField, GenericlPAddressField, CommaSeparatedInetgetField, FilePathField, URLField 등 파생 클래스가 있다.
+
+  >  TextField
+긴 문자열
+
+  >  IntegerField 정수
+  >  DecimaField 실수
+
+  >  BooleanField 참/거짓(true/false) 필드
+
+  >  DateTimeField 날짜와 시간을 저장
+
+  >  BinaryField
+
+  >  FileField
+  >  ImageField 이미지냐 아니냐 확인
+  >  UUIDField 숫자와 문자로 만들어진 해시 값으로 어떤 값이 만들어질지 모름. 유일무이함
+
+ 3) 필드 옵션 - 제약 조건
+  >  null
+  >  blank : null은 안된다. requried 만들 때 사용.
+
+  >  primay key
+  >  unique
+
+  >  default
+
+ 4) 모델 생성 및 적용
+모델을 만들고 데이터베이스에 적용을 하게 되면 만들어지는 테이블이나 연결되는 테이블 이름은 앱이름_모델이름 이 된다.
+데이터베이스에 테이블이 만들어져 있으면 연결을 하고 없으면 
+python manage.py migrate 
+명령으로 생성 가능하다.
+
+  >  자신의 app 디렉토리에 있는 models.py 파일에 작성
+나는 오늘만든 app이 myapp 이니까 myapp/models.py 에 작성!
+
+  >  모델의 변경 내용을 데이터베이스에 적용
+python manage.py makemigrations
+
+python manage.py migrate
+
+
+  >  데이터베이스에 myapp_Item이라는 테이블이 생성 됐는지 확인
+show tables;
+desc myapp_item;
+
+ 5) 샘플 데이터 삽입
+
+insert into myapp_item values(1, 'Lemon', 500, 'Vitamin-A', 'lemon.jpg', 10); 
+insert into myapp_item values(2, 'Orange', 1500, 'Vitamin-B', 'orange.jpg', 20); 
+insert into myapp_item values(3, 'Kiwi', 2000, 'Vitamin-C', 'kiwi.jpg', 15); 
+insert into myapp_item values(4, 'Grape', 1000, 'Vitamin-D', 'grape.jpg', 25); 
+insert into myapp_item values(5, 'Strawberry', 2000, 'Vitamin-E', 'strawberry.jpg', 30); 
+insert into myapp_item values(6, 'Mandarin', 300, 'Vitamin-F', 'mandarin.jpg', 20); 
+
+commit;
+
+select * from myapp_item;
+
+ 6) CRUD 작업 방법
+  >  삽입
+모델 클래스를 가지고 객체를 생성하고 save()를 호출하면 삽입된다.
+
+  >  테이블의 전체 데이터 가져오기
+모델클래스.object.all()를 호출하면 모델 객체의 cursor를 리턴한다.
+
+  >  하나의 데이터 가져오기
+모델클래스.object.get(pk=기본키값)
+
+  >  조건에 맞는 데이터 가져오기
+모델클래스.object.filter(속성이름 연산자 값)
+
+  >  조건에 맞는 않는 데이터 가져오기
+모델클래스.object.exclude(속성이름 연산자 값)
+
+  >  기타
+count()
+order_by()
+distinct()
+first()
+last()
+
+  >  수정 ( 찾아와서 수정한 뒤 저장 )
+변수 = 모델클래스.object.get(pk=값)
+변수.속성 = 값
+변수.save()
+** 있는거면 찾아와서 수정을 하지만 없으면 만들어서 저장 한다 upsert
+
+  >  삭제는 save 대신 delete()를 호출해 사용한다.
+
+ 7) CRUD 실습
+애플리케이션 views.py에 요청을 처리하는 함수를 만든다.
+나는 myapp/views.py
+프로젝트의 urls.py 파일에 url과 요청을 연결한다!
+나는 myproject/urls.py
+
+  > 모든 데이터 가져오기
+  ** views.py
+def index(request):
+    data = Item.objects.all() # 모든 데이터 가져오기
+    return HttpResponse(data)
+
+  ** urls.py
+from myapp import views # myapp의 views 파일을 가져온다고 적어준다
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", views.index),   # 쉼표를 미리 적어둔다!
+]
+
+수정 했으면 서버를 구동하고 브라우저를 켜서 확인하면 끝!
+
+  >  삽입
+  ** views.py
+def index(request):
+    # 데이터 삽입
+    # 모델 클래스에 인스턴스를 만들고 save라는 함수를 호출
+    # Item 클래스의 인스턴스를 생성
+    item = Item()
+    item.itemid = 7
+    item.itemname = "치즈돈까스"
+    item.price = 8000
+    item.description = "먹고싶어요"
+    item.pictureurl = "없어용"
+    item.amount = 10 
+    # save 호출
+    item.save()
+
+DBeaver 테이블을 확인 해보면 위 내용이 들어간 것을 확인할 수 있다
+
+  >  삭제
+    # delete 호출
+    item.delete() # 삭제된다.
+
+ 8) 전체 데이터 보기 구현
+애플리케이션 views.py에 요청을 처리하는 함수를 만든다.
+나는 myapp/views.py
+애플리케이션 디렉토리 안에 html파일을 저장할 templates 디렉토리를 생성
+나는 myapp/templates/test.html 을 만들면 된다.
+프로젝트의 urls.py 파일에 url과 요청을 연결한다!
+나는 myproject/urls.py
+
+  ** views.py
+from myapp.models import Item
+
+    data = Item.objects.all() # item 클래스와 연결된 모든 데이터를 가져온다
+    return render(request, 'test.html', {'data' : data}) # test.html 파일로 출력하는데 이 때 data라는 이름으로 data를 가져온다.
+
+ > 템플릿 엔진을 이용한 출력
+일반 HTML은 자바스크립트를 이용하지 않으면 동적인 데이터를 출력할 수 없다. !!
+HTML과 CSS는 정적파일이다.
+한 번 만들면 소스코드를 고치지 않는 이상 있는 그대로 보여지는 파일이다.
+
+HTML은 정적 파일인데 우리는 반복문을 써서 동적으로 데이터를 자동으로 들어가게 만든 것이다.
+그것을 가능하게 해준놈이 바로 템플릿 엔진,,!!
+
+템플릿 엔진은 서버의 데이터를 출력하는 파일에 전달해 문법으로 출력하는 코드를 작성하면 이를
+HTML 코드로 번역해 출력문을 만들어준다.
+아주 기똥찬 녀석이었다.
+
+django에서는 확장자가 html이지만, 정적파일이 아니기 때문에 templates 디렉토리에 작성한다.
+그렇기 때문에..!! 우리가 오전시간에 templates 디렉토리를 따로 생성한것이다.
+그래서 정적파일은 따로!! 저장한다고 한다.
+정적파일은 수정을 안하기 때문에 따로 메모리에 로드시켜두고, 캐싱을 통해 빠르게 불러온다.
+캐싱은 캐시 또는 임시 저장 위치에 저장하여 보다 빠르게 액세스할 수 있도록 하는것이다.
+
+근데 헷갈리게 확장자를 html로 쓰게 하다니 (자바에서는 jsp라고 한다는ㄷ..)
+
+ 2) 전체 보기에 css를 적용
+ [0] html 파일 최상단에 static 디렉토리의 내용을 불러오는 코드 작성
+  {% load static %}
+ [1] test.html 파일에 css 링크를 추가 한다
+    <!-- css 디렉토리에 있는 style.css를 적용하겠다. -->
+    <link rel="stylesheet" href="{% static 'css/style.css'%}" />
+ [2] 애플리케이션 디렉토리에 static 디렉토리를 생성
+ [3] 생성한 static 안에 css 디렉토리를 생성
+ [4] css 디렉토리 안에 style.css 파일을 만들어서 css 코드를 작성
+되는것만 확인하면 되니까 딱 요정도~
+tr.header{
+    background: #c9bfed;
+}
+tr.record{
+    background: #ededed;
+}
+
+  >  프로젝트의 settings.py 파일에 정적 파일의 위치를 설정
+# static 파일의 위치를 지정
+import os
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+ 3) 상세보기 구현
+ [1]  test.html 파일에서 제목 부분에 링크를 설정
+
+<td align="center"><a href="./detail{{item.itemid}}">{{item.itemname}}</a></td>
+ 
+ [2] views.py 파일에 detail 요청을 처리하는 함수를 추가
+
+def detail(request, itemid):
+    # itemid의 값이 itemid 인 데이터를 1개 가져온다.
+    item = Item.objects.get(itemid=itemid)
+    # detail.html 파일로 출력하는데 이 때 data라는 이름으로 item을 전달한다.
+    return render(request, 'detail.hteml', {'data' : item})
+
+ [3] templates 디렉토리에 detail.html 파일을 생성
+detail.html 파일 최상단에  {% load static %} 를 적어준다.
+
+ [4] urls.py 파일에 url을 처리하는 함수를 연결하는 코드를 작성
+from django.contrib import admin
+from django.urls import path
+from myapp import views
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", views.test),
+    path("index/", views.index),
+    path("detail/<int:itemid>", views.detail)
+]
+
+
+REST API 구현 -중요함
+1) 웹 서비스를 구현하는 방식
+ [1] 서버 사이드 랜더링
+클라이언트(웹 브라우저)의 요청을 서버가 받아서 처리한 후 서버가 출력하는 코드를 만들어서 클라이언트에게 전송하고 클라이언트는 이 코드를 받아 파싱해서 출력하는 방식
+- 서버 코드와 클라이언트 코드를 하나의 프로젝트에 모두 작성함.
+
+서버 코드를 수정 할 때 클라이언트 코드가 영향을 받을 수 있고 반대의 경우도 영향을 받을 수 있어 최근에는 서버 사이드 랜더링을 선호하지 않는다.
+서버 사이드 랜더링을 통해 사이트를 만들기 위해서는 템플릿 언어라는 것을 학습해야 한다.
+{{ }} 형태의 언어
+
+ [2] 클라이언트 사이드 랜더링
+서버는 클라이언트의 요청을 받아 데이터(예전 : XML > 최근: JSON)를 응답으로 전송, 클라이언트는 받아온 데이터를 통해 출력 코드를 직접 만들어 화면에 랜더링 하는 방식
+ - 서버 프로그램과 클라이언트 프로그램을 별도로 작성함
+**서버 프로그램(Python의 Django, Java의 Spring, JavaScript의 express.js 등) 
+   클라이언트 프로그램(vue.js, react.js > next.js, android[java 나 kotlin], ios-swift 등)
+ 
+서버 코드와 클라이언트 코드가 서로에게 영향을 주지 않고 통신만으로 연동된다.
+최근에는 프로그램에 유지보수가 자주 필요하므로 클라이언트 사이드 랜더링과 같은 느슨한 결합(Loosly coupling) 형태로 프로그램을 만드는것을 권장한다.
+
+  >  프로그래밍 언어에서의 객체
+{ name : "아담", age : 53 } - dict
+하나만 만들 경우 이것이 나음
+
+person = Person()
+person.name = "아담"
+person.age = 53
+여러개 만들 경우 이것이 나음
+
+일반 테스트
+            아담 53
+            군계일학 47
+
+tsv - 탭으로 구분
+            아담       53
+            군계일학 47
+
+csv - 콤마로 구분
+            이름,나이
+            아담,53
+            군계일학,47
+
+XML(eXtensible Markup Language) : 데이터를 태그로 표현
+현재는 일부 RSS 서비스에서 사용되고 주로 설정 파일에서 많이 사용한다.
+            <persons>
+                        <person>
+                                    <name>아담</name>
+                                    <age v="53"/>
+                        </person>
+                        <person>
+                                    <name>군계</name>
+                                    <age v="47"/>
+                        </person>
+            </persons>
+
+
+JSON(JavaScript Object Notation / 자바스크립트 객체 표현법[파이썬과 동일])
+최근 데이터 교환에서 가장 많이 사용되고 모바일은 거의 대부분이 JSON 방식이다
+서버 개발자는 JSON을 잘 만들어야 하고, 클라이언트 개발자는 JSON 파싱을 잘 해야한다.
+            객체 : {}
+            배열 : []
+            [{"name" : "아담", "age" : 53},{"name" : "군계", "age" : 47}]
+
+
+YAML(야믈)
+이메일 표현방식을 이용해 데이터를 표현, 최근 설정 파일에 많이 사용한다.
+현재까지 데이터 교환에는 사용되지 않는다.
+
+            person:
+                        name: 아담
+                        age: 53
+            person:
+                        name: 군계
+                        age: 47
+
+2) Python django에서 json 데이터를 제공하는 방법
+ [1] dict 또는 list(tuple)로 데이터를 만들어서 직접 리턴하는 방식
+ [2] 프레임워크를 이용하는 방식
+
+3) 직접 dict 또는 list를 만들어서 리턴하는 방식
+  -  하나의 인스턴스를 dict로 만들어주는 함수나 클래스를 만들어서 사용하면 편리하다.
+
+person = Person()
+person.name = "아담"
+person.age = 53
+
+p = {"name" : person.name, "age" : person.age}
+
+
+4) 전체보기를 JSON으로 출력
+  -  model 클래스의 인스턴스를 dict로 변화시켜주는 파일을 views.py에 작성
+
+def itemTodict(item):
+    output = {} # dict를 생성
+
+    # 인스턴스의 속성을 딕셔너리에 저장
+    output["itemid"] = item.itemid
+    output["itemname"] = item.itemname
+    output["price"] = item.price
+    output["description"] = item.description
+    output["pictuerurl"] = item.pictuerurl
+    output["amount"] =item.amount
+
+    return output
+
+  -  
+# JSON으로 RETURN 하기 위한 패키지를 IMPORT
+from django.http import JsonResponse
+def allItems(request):
+    # 전체 데이터 가져오기
+    items = Item.objects.all()
+    # 여러개의 데이터 이므로 list에 저장하기
+    datas = []
+    for item in items:
+        datas.append(itemTodict(item))
+    # list를 JSON으로 리턴
+    return JsonResponse(datas)
+
+ - urls.py 파일에 url 과 views.py 의 함수를 연결하는 코드를 작성
+from django.contrib import admin
+from django.urls import path
+from myapp import views
+
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", views.test),
+    path("index/", views.index),
+    path("detail/<int:itemid>", views.detail),
+    path("allitem/", views.allItems),
+
+5) 상세보기 구현
+  -  views.py에 상세보기를 구현할 함수를 작성.
+def getitem(request,itemid):
+    # itemid가 매개변수인 데이터 가져오기
+    # 앞의 itemid는 컬럼이름 뒤의 itemid는 매개변수로 넘어온 값
+    item = Item.objects.get(itemid=itemid)
+    return JsonResponse(itemTodict(item))
+
+  -  urls.py에 views.py와 연결할 함수를 작성
+from django.contrib import admin
+from django.urls import path
+from myapp import views
+
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", views.test),
+    path("index/", views.index),
+    path("detail/<int:itemid>", views.detail),
+    path("allitem/", views.allItems),
+    path("get/<int:itemid>", views.getitem)
+]
