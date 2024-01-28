@@ -128,10 +128,223 @@ TIME_ZONE = "Asia/Seoul" 로 수정!
 python manage.py makemigrations
 python manage.py migrate
 
-마지막으로 관계형 데이터베이스를 실행시켜 연동이 잘 되었는지 테스트를 진행한다
-
+이제 서버를 구동시켜 잘 되는지 테스트를 해본다.
+python manage.py runserver 127.0.0.1:80
+서버를 구동하고 브라우정저에 127.0.0.1/example/books 를 입력해서 확인
+데이터를 삽입 할 때 에러가 발생
+rest_framework를 사용할 때는 데이터를 save 할 때
 
  [6] 실행 및 테스트
 
 
   2) Git Hub에 Push
+Git Hub를 쓰기 위해서는 일단 Git이 설치가 되어있는지 확인을 해보는게 먼저겠쥬?
+cmd 에서 git --version 명령을 입력해서 확인해본다~
+
+확인을 했으면 이제 디렉토리를 로컬에 있는 git에 등록 한다 명령어는 아래와 같다.
+git init
+
+그러면 디렉토리 안에 .git 이라는 디렉토리가 생성된다. 디렉토리 이름 앞에 .이 붙으면 숨긴항목이라는 뜻이당.
+git 등록을 취소하려면 .git 디렉토리를 강제로 삭제하면 된다.
+
+  >  git 에서 관리할 파일을 등록
+파일을 등록하는 명령어는 아래와 같다
+git add 파일이나디렉토리이름을나열
+git add . 을 입력하면 디렉토리의 모든 파일과 디렉토리를 등록한다.
+
+  >  현재까지 변경 내역을 로컬 git에 반영
+
+git commit -m "메세지"
+
+메세지를 잘 써줘야 관리할 때 구분하기가 쉽다.
+
+
+  >  현재까지 commit 한 내역을 확인
+commit 아이디를 조회 할 수 있다.
+git log
+
+  >  이전 작업으로 돌아가기
+git reset --soft commit아이디  - 이전 내역을 저장 해놓지만 코드를 수정하지 않는다.
+git reset --hard commit아이디 - 이전 내역을 날려버리고 코드를 수정한다.
+
+  >  원격에 저장할 때 파이썬 프로젝트에서 수행 할 작업
+.gitignore 파일을 만들어서 가상환경 디렉토리를 등록해 가상환경이 업로드 되지 않도록 한다.!!
+.gitignore는 업로드 하지 않을 파일이나 가상환경을 넣어두는 디렉토리이다.
+
+pip freeze > requirments.txt
+명령을 수행해 내가 설치한 패키지 목록을 requirments.txt에 저장한다.
+
+  >  github.com 에서 repositoty를 생성
+1번만 수행한다.
+파일이나 데이터 버전 관리하고 저장하는 공간으로 소스 코드, 문서, 이미지 등 다양한 종류의 파일을 저장하고 버전관리를 위해 사용될 수 있다.
+버전관리와 같은, 파일/데이터의 관리를 위한 목적으로 사용된다.
+원격저장소는 로컬저장소 외에 위치한 저장소이다.
+여러 개발자들과 작업을 할 수 있으며, 인터넷을 통해 액세스하고 git DVCS를 사용할 수 있다.
+GitHub, GitLab, Bitbucket과 같은 웹 호스팅 서비스는 원격 저장소를 제공하고 여러 개발자가 모여 협업하고 소스 코드 관리를 할 수 있게 한다.
+  
+  >  로컬 git과 원격 repository를 연결
+git remote add 이름 repositoryurl
+
+git remote add origin https://github.com/2ffect/DX_JH.git
+맨 처음 연결하는 경우 관습적으로 이름은 origin을 많이 쓴다.
+
+  >  연결확인
+git remote -v
+
+  > 현재 commit을 업로드
+git push 이름 브랜치이름
+
+  >  브랜치 이름 확인
+git branch 
+를 했을 때 * 표시가 있는 이름
+
+  >  브랜치 생성
+git checkout -b 브랜치이름
+
+  >  브랜치 전환
+git checkout 브랜치이름
+
+
+  >  로컬에서 코드 수정 후 깃에 올리기
+git add.
+git commit -m "메세지"
+git push origin main
+
+  >  깃에서 수정된 내용을 로컬에 반영
+git pull origin main
+
+  >  깃에 있는 프로젝트를 가져오기
+git clone 저장소url
+
+1) REST API 작업 프로젝트
+ 요청을 분할해서 처리
+지금까지는 모든 요청 처리를 프로젝트의 urls.py 에 작성해서 사용했다.
+요청이 많아지면 urls.py의 내용이 많아져 소스코드가 어려워지고 그로인해 유지보수가 어렵고 여러명이 동시에 작업하기가 어려워진다.
+
+url요청을 분할하여 처리할 때는 urls.py 파일에 django.urls.include 를 import 하고
+path("공통url", include("처리할 모듈 이름"))을 추가해 주면 된다.
+
+# url의 처리를 다른 모듈에 위임하고자 할 때 사용하는 패키지를 import
+from django.urls import include
+# example로 시작하는 요청이 오면 apiapp/urls.py 파일에 처리를 위임 하겠다.
+urlpatterns = [
+     path("example/", include("apiiapp.urls")),
+]
+
+  apiapp/views.py 파일에 요청이 오면 처리하는 함수를 작성
+
+# python 에서 @으로 시작하는 단어는 decorator라고 하는데 실제 함수를 호출하면
+# 특정 내용을 삽입해서 함수를 실행한다. 반복적으로 사용하는 내용이나 작성하기 번거로운 내용을 decorator로 만든다.
+
+@api_view(['GET'])
+def 함수이름(request):
+    return Response(데이터)
+
+ 5) 데이터베이스에 테이블 생성하기
+ [1] models.py 파일에 Model 클래스로부터 상속받는 클래스 생성
+# apiapp_book 이라는 테이블을 생성
+class Book(models.Model):
+    bid = models.IntegerField(primary_key = True)
+    title = models.CharField(max_length = 50)
+    author = models.CharField(max_length = 50)
+    date = models.DateField()
+    
+ [2] 데이터베이스에 반영
+python manage.py makemigrations
+python manage.py migrate
+
+ [3] 데이터베이스에 접속해서 apiapp_book 테이블이 생성 확인
+
+ [4] 삽입과 조회
+  >  개요
+삽입을 하는 경우 클라이언트가 삽입할 데이터를 매개변수로 전송하면 서버는 매개변수를 각각 모델 클래스로 변환 후 save 함수를 호출해 삽입된다.
+
+rest_framework 에서는 serializer를 정의해 클라이언트가 전송한 매개변수를 모델 클래스로 자동변환 시키는 것이 가능하다.
+
+  >  apiapp 디렉토리에 serializers.py 파일은 만들고 클라이언트의 매개변수를 Book 모델로 변환하는 Serializer 클래스를 생성한다.
+
+from rest_framework import serializers
+from .models import Book
+
+class BookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Book
+        # 클라이언트에서 입력하는 데이터만 나열
+        # 아래 나열한 데이터를 입력하면 Book 클래스의 인스턴스를 자동 생성
+        fields = ['bid', 'title', 'author', 'date']
+
+  >  데이터를 삽입하는 처리와 전체를 조회하는 처리를 views.py 파일에 작성
+
+from rest_framework import status
+from rest_framework.generics import get_object_or_404
+from .models import Book
+from .serializers import BookSerializer
+
+@api_view(['GET', 'POST'])
+def booksAPI(request):
+    # GET 방식의 처리 - 조회를 입력하는 경우
+    if request.method == 'GET':
+        # 테이블의 데이터를 전부 가져오기
+        books = Book.objects.all()
+        # 출력하기 위해서 브라우저의 형식으로 데이터를 변환
+        serializer = BookSerializer(books, many=True)
+        # 출력
+        return Response(serializer.data)
+    
+    # POST 방식의 처리 - 삽입의 경우
+    elif request.method == 'POST':
+        # 클라이언트에서 전송된 데이터를 가지고 Model 인스턴스 생성
+        serializer = BookSerializer(data = request.data)
+        serializer.save()
+        return Response(serializer.data)
+    
+    # # PUT 방식의 처리 - 수정의 경우
+    # elif request.method == 'PUT':
+
+    # # DELETE 방식의 처리 - 삭제의 경우
+    # elif request.method == 'DELETE':
+
+  >  urls.py 파일에 url을 처리해 줄 코드를 작성
+
+from django.urls import path
+from .views import hello, booksAPI
+
+
+urlpatterns = [
+    path("hello/", hello),
+    path("books/", booksAPI),
+]
+
+  >  서버를 구동하고 127.0.0.1/example/books url에 접속해서 확인해본다 !
+
+- 서버를 구동하고 브라우저에 127.0.0.1/example/books 를 입력해서 확인
+    
+    ( 프로젝트urls path/app urls 클래스명 path )
+    
+    데이터를 삽입할 때 에러가 발생
+    
+    rest_framework 를 사용할 때는 데이터를 save 할 때 is_valid() 를 호출해서 유효성 검사에 통과했을 때 삽입되도록 해야 합니다.
+
+  > 1개 데이터 가져오기
+views.py 파일에 처리하는 함수를 작성한다.
+@api_view(['GET'])
+def onBookAPI(request, bid):
+    # Book 테이블에서 bid 컬럼이 값이 bid인 값을 찾아온다.
+    book = get_object_or_404(Book, bid=bid)
+    #출력할 수 있도록 변환
+    serializer = BookSerializer(book)
+
+urls.py 파일에 url과 함수를 연결하는 코드를 작성
+from django.urls import path
+from .views import hello, booksAPI, oneBookAPI
+
+
+urlpatterns = [
+    path("hello/", hello),
+    path("books/", booksAPI),
+    path("book/<int:bid>", oneBookAPI),
+]
+
+
+
+
