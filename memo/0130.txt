@@ -1,0 +1,324 @@
+1. React
+1)SPA(Single Page Application)
+  >  하나의 HTML 파일을 이용해 애플리케이션의 모든 화면을 출력하는 방식
+
+ 이전에 배운 애플리케이션들은 여러개의 HTML 파일을 만들어 화면 전환을 하는 방식으로 여러 콘텐츠들을 출력하기 위해 화면 전환을 하게 되며 이전 내용을 삭제하고 새로운 내용을 출력해야 하기 때문에 깜빡임 문제가 발생하고 네트워크 에러가 발생할 경우 화면 전체에 에러 페이지가 출력되었다.
+이 방법은 모바일의 경우 에러 페이지가 출력되는 횟수가 증가할 수 있다.
+
+ 이를 해결하기 위해 로컬에 데이터를 저장하여 네트워크 에러가 발생할 경우 로컬 데이터를 출력하는 방법으로 해결 하기도 하고 하나의 화면을 여러 컴포넌트로 분할하여 컴포넌트 별로 데이트를 요청해 출력하는 방식을 사용하기도 한다.
+
+  >  SPA를 만들기 위해 주로 사용되는 프레임워크
+  - angular, react, vue
+angular : 구글에서 만든 것으로 더이상 업데이트를 진행하지 않는다고 공식적으로 발표했다.
+react, vue : 국내 플랫폼 기업이나 중소기업에서 선호하며 vue를 사용하는 곳도 있다.
+
+2) React
+  -  react는 2013년 facebook에서 발표한 오픈소스로 SPA를 구현하기 위한 자바스크립트 프레임워크로 가상의 DOM과 JSX라는 새로운 문법을 이용해 동작한다.
+ 
+ react에서 화면에 출력되는 개체 하나하나를 Component라고 부른다. 출력 방식은 게임 엔진의 방식을 이용하여 빠른 출력이 가능하며 또 가상의 DOM을 메모리에 배치해 일반 자바스크립트로 출력하는 것 보다 빠르게 출력된다. 
+** 게임 엔진의 출력방식 : 갱신이 필요한 경우 전체를 갱신하지 않고 갱신이 필요한 부분만 갱신한다.
+** react-native를 이용하면 모바일 앱을 만들 수 있고 피그마를 이용해 디자인의 도움을 받을 수 있다.
+
+3) 설치
+  >  node.js (자바스크립트로 애플리케이션을 개발하기 위한 플래폼) 설치
+(짝수버전이 배포버전으로 개발을 위해서는 짝수버전을 사용한다.)
+다운로드 : https://nodejs.org/en
+설치확인 : node --version
+
+  >  패키지 관리자 : npm, yarn
+패키지 관리자를 이용해 패키지를 설치하면 package.json 이라는 파일에 의존성을 설정하고 
+node_modules 디렉토리에 패키지를 저장한다.
+git hub에 업로드 할 때 node_modules는 업로드 할 필요가 없고 packge.json 파일만 업로드 시킨다면 다시 설치 할 수 있다.
+
+ npm은 node를 설치하면 자동으로 설치 되지만 yarn은 따로 설치 해줘야 한다.
+yarn 설치 명령어
+npm install --location=global yarn
+설치확인 : yarn --version
+
+4) react 프로젝트 생성 및 실행
+ [1] 생성명령 : yarn create react-app 앱이름
+
+ [2] 실행명령 : yarn start
+      yarn을 설치하지 않은경우 : nmp
+
+5) UI 개발을 위한 패키지 설치
+npm install --save --legacy-peer-deps @material-ui/core
+npm install --save --legacy-peer-deps @material-ui/icons
+
+node의 경우 애플리케이션 안에 패키지가 설치되기 때문에 따로 가상환경을 생성하여 패키지를 설치할 필요가 없다. 애플리케이션 디렉토리의 node_modules 디렉토리에 설치된다.
+
+6) 컴포넌트를 만들어서 화면에 출력
+  >  Component : 화면에 출력되는 독립적인 개체
+scr 디렉토리에 ToDo.jsx(확장자는 js도 상관없지만, react컴포넌트 파일임을 명시하기 위해 jsx로 설정) 파일을 생성하고 작성한다.
+
+import React from "react"
+
+class ToDo extends React.Component {
+    render(){
+        return(
+            <div className = "ToDo">
+                <input type = "checkbox" id = "todo0" name = "todo0" value = "todo0"/>
+                <label for = "todo0"> ToDo 컴포넌트 만들기</label>
+            </div>
+        )
+    }
+}
+
+** SPA에서는 이러한 컴포넌트를 만들면 모두 메인 페이지에 출력한다.
+** React는 출력하는 방식이 HTML과 다르기 때문에 수정되는 부분을 자바스크립트를 사용해 줘야 하지만 class 정의를 통해 render()의 도움을 받아 return을 계속해서 받아오는 것이다.
+
+
+  >  메인 페이지의 역할을 수행하는 App.js 파일을 수정해서 ToDo 컴포넌트를 출력
+
+import React from 'react'
+import ToDo from "./ToDO"
+
+
+function App() {
+  return (
+    <div className="App">
+      <ToDo />
+    </div>
+  );
+}
+
+// export default App;
+export default Todo;
+**자바스크립트는 파이썬과 다르게 이름이 같다고 바로 끌어다 쓸 수 없다. 
+끌어다 쓸 수 있도록 export default 설정을 해줘야 한다.
+
+  >  react는 App.js 파일이 전체 화면에 출력되는 파일이다. 따라서 App.js에 작성한 내용이 출력된다.
+react는 반드시 <div>에 하나로 묶어서 출력해야 한다.
+
+7) 컴포넌트에서 데이터를 사용(사용하여 출력)하는 방법
+ [1] props : 상위 컴포넌트에서 넘겨주는 데이터
+* 오늘 만든 App.js 의 <div classname="App"> 에서 classname은 div의 props이다.
+ [2] state : 컴포넌트 내부에서 사용하는 데이터
+* react는 props나 state에 변화가 생기면 화면을 다시 출력한다. ( 자동으로 다시 출력되도록 메커니즘이 구성됨 )
+ [3] context : 모든 컴포넌트에서 사용할 수 있는 데이터 ( 전역 데이터 )
+
+ [4] redux : 전역 데이터를 만드는 외부 라이브러리 
+* react에 포함되어 있지 않아 따로 설치가 필요함.
+
+** context, redux 를 사용하지 않고 전역 데이터를 출력하는 방법으로 App.js가 출발점 역할을 하기 때문에 App.js파일 에서 데이터를 만들어 넘겨주는 방법도 있다.
+( 출발점이 데이터를 가지고 있으면 모든 영역에 넘겨줄 수 있다.)
+
+8) props 와 state 사용하기
+  >  ToDo.jsx 파일 수정하기
+
+class App extends React.Component {
+  constructor(props){
+    super(props)
+    // this.state.item = {id : 0, "title":"Hello React", "done":true}
+    // ToDo.jsx로 넘겨 줄 props 를 만들어 줌.
+    this.state = {item:{id : 0, "title":"Hello React", "done":true}}
+  }
+}
+
+  render(){
+    return(
+      <div>
+        <ToDo item = {this.state.item} />
+      </div>
+    )
+  }
+
+  export default App;
+
+*** 태크에서 공통되는 특성
+id : 자바스크립트에서 태그를 구별해서 가져오기 위한 값으로 중복될 수 없다.
+ - document.getElementById
+class ( react 에서는 className ) : css에서 동일한 디자인을 적용하기 위한 이름으로 중복 가능하다.
+ - document.getElementsByClassName
+name : 클라이언트에서 서버에 전송할 때 서버에서 읽기 위한 이름으로 중복 가능하다. 
+ - (checkbox, select 등)
+** 일반적으로 react에서는 클라이언트에서 서버에 전송하지 않기 때문에 name은 사용하지 않는다.
+
+태크 : 화면에 보여지는 개체
+  >  컴포넌트 
+  -  하나의 영역을 나타내기 위한 태그와 코드의 집합, 자체적으로 데이터를 가질 수 있고 데이터가 수정되면 자동으로 재출력하고 미리 구조를 만들어두고 다시 출력할 때는 변경된 부분만 다시 출력
+
+  >  프레임워크 사용법
+ [1] 프레임워크가 제공하는 기능을 그대로 사용
+  -  클래스의 기능이 충분하기 때문에 클래스를 이용해 인스턴스를 만들어 바로 사용하는 방법
+
+* 프레임워크가 Template 라는 클래스 제공할 경우
+ templete = new Template() 형식으로 바로 사용
+ 
+ [2] 프레임워크가 제공하는 기능을 재정의 하여 사용
+  -  클래스의 기능이 충분하지 않아 프레임워크가 제공하는 기능을 상속받은 뒤 필요한 기능을 추가하여 사용하는 방법으로 상속을 받게되면 상위 클래스의 모든 기능을 하위 클래스가 물려받으므로 하위 클래스에 추가적인 기능을 추가시켜 사용한다.
+
+* React 에서는 Component 라는 클래스가 Component의 기능을 가지고 있으나, 화면에 아무것도 출력하지 않기 때문에 Compnent를 생성 할 때 React.Component로 부터 상속받은 뒤 render() 라는 메서드의 재정의를 통해 return 하는 내용을 출력하도록 설계
+
+--------------------------------------------------------------------------------------------------------------------
+
+1) 배열
+  >  App.js 파일에서 오전에 만들었던 props를 3개의 객체를 가진 배열로 수정
+
+class App extends React.Component {
+  constructor(props){
+    super(props)
+    // 3개의 객체를 가진 배열을 생성
+    this.state = {item:[{id : 0, title:"Hello React", done:true},
+    {id : 1, title : "vue", done : false}, {id : 2, title : "angular", done : false}]}
+  }
+
+
+  >  배열이나 리스트를 순회하며 작업을 수행하는 함수
+ [1] map : 데이터를 변환해주는 함수
+함수(리턴을 가지는 함수)를 대입해서 함수에 데이터를 순서대로 대입하고 결과를 모아 다시 배열이나 리스트로 반환하는 함수
+
+ [2] filter : 데이터를 필터링해주는 함수
+boolean을 리턴하는 함수를 대입해 데이터를 순서대로 대입하고 return 값이 true인 데이터만 모아 다시 배열이나 리스트로 반환하는 함수
+
+ [3] reduce : 계산을 수행하여 리턴해주는 함수
+연산을 한 후 리턴하는 함수를 대입해 데이터를 순서대로 대입하고 return 값을 가지고 다음 함수 호출의 매개변수로 활용해 결과를 하나의 값으로 반환하는 함수
+
+
+2) material ui 활용 디자인 변경
+  >  material design 
+  -  구글이 제시한 PWA(Progressive Web Apps / 모바일 앱 같은 웹 UI)를 위한 디자인 방식
+구글의 matrerial design을 적용한 패키지를 통해 활용할 수 있다. 
+우리는 오전에 설치를 했지만~ 다시 패키지 설치 명령어를 적어보자면 아래와 같다.
+npm install --save --legacy-peer-deps @material-ui/core
+npm install --save --legacy-peer-deps @material-ui/icons
+
+도큐먼트 : https://mui.com
+
+ToDo.jsx 파일에서 코드를 수정해 디자인을 변경 해보자.
+
+import React from "react"
+import{
+    ListItem,
+    ListItemText,
+    InputBase,
+    Checkbox,
+} from "@material-ui/core"
+
+// react에서 컴포넌트 클래스를 만들기 위해 Componenet로 부터 상속 받기
+class ToDo extends React.Component {
+    // 생성자 생성
+    constructor(props){
+        // App.js에서 넘겨 준 속성들을 자신의 props에 저장
+        super(props); // 상위 클래스에서 넘겨준 모든 props를 현재 클래스에 저장
+        // state 생성
+        // props 중 item 이라는 값을 state로 저장
+        // props 는 상위 컴포넌트(현재는 App.js)로 부터 받은 데이터라 읽기는 
+        // 가능하지만 수정이 불가능하다.
+        // 따라서 수정, 삭제를 하고자 할때 state 로 변환해주어야 한다.
+        this.state = {item:props.item}
+    }
+
+    // render는 화면에 출력할 내용을 리턴하는 메서드
+    render(){
+        // 자주 사용하는 데이터코드를 짧게 작성하기 위해 다른 변수에 대입
+        const item = this.state.item
+        return(
+            <ListItem>
+                <Checkbox check = {item.done} />
+            <ListItemText>
+                <InputBase
+                    inputProps = {{"aria-label" : "naked"}}
+                    type = "text"
+                    id = {item.id}
+                    name = {item.id}
+                    value = {item.title}
+                    multiline = {true}
+                    fullWidth = {true}
+                />
+            </ListItemText>
+            </ListItem>
+        )
+    }
+}
+
+export default ToDo
+
+3)
+
+4) 하나의 문자열을 입력할 수 있는 컴포넌트를 만들어 화면에 추가
+  -  scr 디렉토리에 컴포넌트로 사용 할 파일을 추가하여 코드 작성
+
+import React from "react";
+import { TextField, Paper, Button, Grid } from "@material-ui/core"
+
+
+
+class AddToDo extends React.Component{
+    constructor(props){
+        super(props);
+    }
+
+    render(){
+        return(
+            <Paper style ={{margin : 16, padding : 16}}>
+                <Grid contatiner>
+                    <Grid xs = {11} md = {11} item style = {{paddingRight : 16}}>
+                        <TextField placeholder = "여기에 입력하세용~ ^_^" fullWidth />        
+                    </Grid>
+                    <Grid xs = {1} md = {1} item>
+                        <Button fullWidth color = "secondary">
+                            +
+                        </Button>
+                    </Grid>
+                </Grid>    
+            </Paper>
+        )
+    }
+}
+
+export default AddToDo
+
+  -  App.js 에서 코드를 수정
+
+import AddToDo from "./AddToDo"
+import {Paper, List} from "@material-ui/core"
+
+
+class App extends React.Component {
+  constructor(props){
+    super(props)
+    // this.state.item = {id : 0, "title":"Hello React", "done":true}
+    // ToDo.jsx로 넘겨 줄 데이터를 this.state 이름으로 만들어 줌.
+    // 이것을 ToDo에서 props로 받아 사용한다.
+    // 3개의 객체를 가진 배열을 생성
+    this.state = {items:[ {id : 0, title:"Hello React", done:true},
+                          {id : 1, title : "vue", done : false}, 
+                          {id : 2, title : "angular", done : false}]
+                        }
+  }
+
+
+    let display = this.state.items.length > 0 && (
+     <Paper style = {{margin : 16}} > 
+      <List>
+        {this.state.items.map((item, idx)  => (
+          <ToDo item ={item} key = {idx} />
+        ))}
+      </List>
+    </Paper>
+    )
+
+
+    return(
+      <div>
+        <AddToDo />
+        {display}
+      </div>
+    )
+  }
+}
+
+  export default App;
+
+5) Enter를 누르거나 + 버튼을 누르면 입력한 내용을 추가해 화면에 반영하는 event 처리
+ 먼저 알고 갈 것 >> 함수는 일급 객체 : 파이썬과 자바스크립트가 여기 해당
+ [1] 함수도 하나의 자료형
+ [2] 함수를 이용해 변수를 생성할 수 있고 함수를 매개변수로 대입할 수 있고 함수를 리턴할 수 있다.
+
+  >  App.js 파일에 데이터를 삽입하는 메서드를 작성하고 AddToDo 컴포넌트에 넘겨준다.
+
+react는 수정이 발생 한 부분만 출력을 하는 방식이기 때문에 원본은 존재해야한다.
+그렇기 때문에 원본을 두고 복사한 데이터에 데이터를 수정하여 다시 원본에 덮어써서 출력하기 때문에 데이터를 복사하고, 복사한 데이터에 데이터를 추가하고, 복사한 데이터를 다시 state에 적용하는 과정을 수행하는 것이다.
+
+  >  AddToDo.jsx 에서 
